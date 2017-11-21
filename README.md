@@ -7,17 +7,17 @@ To make it work:
 
 Change permissions for the serial and urg nodes
 
-Urg
-$ sudo chmod 777 /dev/ttyACM0 
+## Urg
+##### sudo chmod 777 /dev/ttyACM0 
 
-Teensy
-$ sudo chmod 777 /dev/ttyACM1
+## Teensy
+##### sudo chmod 777 /dev/ttyACM1
 
 Run these launch files:
 
-$ roslaunch odom_speed hokuyo.launch
-$ roslaunch odom_speed launch_motors_pid.launch
-$ roslaunch odom_speed nav2d.launch
+##### roslaunch odom_speed hokuyo.launch
+##### roslaunch odom_speed launch_motors_pid.launch
+##### roslaunch odom_speed nav2d.launch
 
 And that's it ! Everything is now on these launch files :) and yeah ... the /cmd topic now is subscribed to a joy node (PS4 controller)
 
