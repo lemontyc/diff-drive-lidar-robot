@@ -3,7 +3,6 @@
 #include <std_msgs/Float64.h>
 #include "DualMC33926MotorShield.h"
 
-
 DualMC33926MotorShield md;
 
 Encoder myEnc1(31, 32);
