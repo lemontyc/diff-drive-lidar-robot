@@ -38,7 +38,11 @@
 	 <!-- Node for Twist to Motors -->
 	 	<node pkg="odom_speed" type="twistToMotors.py" name="twistToMotors"/>
 	 
-	 
+	 <!-- Node for Serial Communication with Teensy -->
+		<node pkg="rosserial_python" type="serial_node.py" name="serial_node" >
+			<param name="port" value="/dev/ttyACM1"/>
+		</node>
+			 
    <!-- rqt_plot is a resource hog, so if you're seeing high CPU usage, don't launch rqt_plot  -->
     <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"
     args=  "/left_motor/control_effort/data /left_motor/state/data /left_motor/setpoint/data
