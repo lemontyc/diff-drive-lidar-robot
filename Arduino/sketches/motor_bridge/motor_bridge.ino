@@ -1,75 +1,70 @@
 #include <Encoder.h>
 #include <ros.h>
-#include <std_msgs/Float32MultiArray.h>
-#include <geometry_msgs/Twist.h>
+#include <std_msgs/Float64.h>
 #include "DualMC33926MotorShield.h"
+
 
 DualMC33926MotorShield md;
 
 Encoder myEnc1(31, 32);
 Encoder myEnc2(33, 34);
 
+const float pi = 3.14159;
+float r = 0.075;
+
 ros::NodeHandle  nh;
-const float pi = 3.141516;
-float r = 0.075, refsign=0.0, ref = 0.0;
-float angle = 0;
 
-std_msgs::Float32MultiArray flt_msg;
-ros::Publisher motor_speed("motor_speed", &flt_msg);
+// Real speed variables
+std_msgs::Float64 motor_left_speed;
+std_msgs::Float64 motor_right_speed;
 
-void messageCb( const geometry_msgs::Twist& toggle_msg){
-  refsign = toggle_msg.linear.x;
-  ref=abs(toggle_msg.linear.x);
-  angle = toggle_msg.angular.z;
+// Set speed variables
+std_msgs::Float64 motor_left_speed_set;
+std_msgs::Float64 motor_right_speed_set;
+
+// Callbacks for motor speed
+
+void set_left_speed( const std_msgs::Float64& motor_left_speed_set){
+  // Left motor
+  md.setM2Speed(map(motor_left_speed_set.data, -1, 1, -400,400));
 }
 
-ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel", &messageCb );
+void set_right_speed( const std_msgs::Float64& motor_right_speed_set){
+  // Right motor
+  md.setM1Speed(map(motor_right_speed_set.data, -1, 1, -400,400));
+}
+
+
+// Real velocity publishers
+ros::Publisher motor_left("/left_motor/state", &motor_left_speed);
+ros::Publisher motor_right("/right_motor/state", &motor_right_speed);
+
+// Velocity subscribers
+ros::Subscriber<std_msgs::Float64> motor_left_controller("/left_motor/control_effort", &set_left_speed );
+ros::Subscriber<std_msgs::Float64> motor_right_controller("/right_motor/control_effort", &set_right_speed);
 
 long oldPosition1  = -999, oldPosition2  = -999;
 float rads1 = 0.0, rads2 = 0.0;
-
-unsigned long t1,t2;
-
-float ki = 1000.8, ki2 = 1000.8;
-float kp = 605.5, kp2 = 605.5;
-
-float T=0.1;
-float a,b,c;
-float a2,b2,c2;
-float eant = 0,uant = 0, eact=0, uact=0;
-float eant2 = 0,uant2 = 0, eact2=0, uact2=0;
-float factor = 100000;
-
-
-float y_k, u_k = 0;
-float y_k2, u_k2 =0;
 long newPosition1, newPosition2;
-float data[2];
 
 
-void setup() {
-  //Serial.begin(115200);
+void setup()
+{
   md.init();
+  // Right motor
   md.setM1Speed(0);
+  // Left motor
   md.setM2Speed(0);
   nh.initNode();
-  nh.advertise(motor_speed);
-  nh.subscribe(sub);
-
-  
-  a = 1*factor;
-  b = (kp+(ki*T)/2.)*factor;
-  c = (ki*T/2.-kp)*factor;
-
-  a2 = 1*factor;
-  b2 = (kp2+(ki2*T)/2.)*factor;
-  c2 = (ki2*T/2.-kp2)*factor;
+  nh.advertise(motor_left);
+  nh.advertise(motor_right);
+  nh.subscribe(motor_left_controller);
+  nh.subscribe(motor_right_controller);
 }
 
-void loop() {
-
-  t1 = millis();
-  nh.spinOnce();
+void loop()
+{
+  // Right motor speed
   newPosition1 = myEnc1.read();
   if (newPosition1 != oldPosition1) {
     rads1 = abs(oldPosition1-newPosition1)*(pi/100.0);
@@ -78,6 +73,9 @@ void loop() {
   }else{
     rads1=0;
   }
+  motor_right_speed.data = rads1;
+  
+  // LEft motor speed
   newPosition2 = myEnc2.read();
   if (newPosition2 != oldPosition2) {
     rads2 = abs(oldPosition2-newPosition2)*(pi/100.0);
@@ -86,62 +84,17 @@ void loop() {
   }else{
     rads2=0;
   }
-
-  y_k = rads1;
-  if( angle != 0 && ref != 0){
-    ref = angle * .16;
-  }
-  eact = ref-y_k;
-  uact = (a*uant+b*eact+c*eant)/factor;
-  uact = min(uact,400.);
-  uact = max(uact,0.);
+  motor_left_speed.data = rads2;
   
+  
+  motor_left.publish(&motor_left_speed);
+  motor_right.publish(&motor_right_speed);
+  
+  /*
+  str_msg.data = hello;
+  chatter.publish( &str_msg );
+
+  */
   nh.spinOnce();
-  y_k2 = rads2;
-  if( angle != 0 && ref != 0){
-    ref = angle * -.16;
-  }
-  eact2 = ref-y_k2;
-  uact2 = (a*uant2+b*eact2+c*eant2)/factor;
-  uact2 = min(uact2,400.);
-  uact2 = max(uact2,0.);
-  
-  //float w = (uact-uact2)/0.33;
-  if(ref == 0 && angle >=0){
-    ref = angle * -.16;
-    ref = (ref * 400.0)/(0.52*0.32);
-    md.setM1Speed(-ref);
-    md.setM2Speed(ref);
-  }else if(ref == 0 && angle <0){
-    ref = angle * .16;
-    ref = (ref * 400.0)/(0.52*0.32);
-    md.setM1Speed(ref);
-    md.setM2Speed(-ref);
-    
-  }else if(refsign > 0 ){
-    md.setM1Speed(uact);
-    md.setM2Speed(uact2);
-  }else {
-    md.setM1Speed(-uact);
-    md.setM2Speed(-uact2);
-  }
-  
-   
-  
-
-  data[0] = rads1;
-  data[1] = rads2;
-  flt_msg.data = data;
-  flt_msg.data_length = 2;
-  motor_speed.publish( &flt_msg );
-  uant = uact;
-  eant = eact;
-
-  uant2 = uact2;
-  eant2 = eact2;
-
-  t2 = millis();
-  nh.spinOnce();
-  delay(100-(t2-t1));
+  delay(100);
 }
-
