@@ -13,7 +13,7 @@ Change permissions for the serial and urg nodes
 ## Teensy
 ##### sudo chmod 777 /dev/ttyACM1
 
-Run these launch files:
+## Launch files
 
 ##### roslaunch odom_speed hokuyo.launch
 ##### roslaunch odom_speed launch_motors_pid.launch
