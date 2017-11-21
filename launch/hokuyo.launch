@@ -8,6 +8,8 @@
 	<node pkg="tf" type="static_transform_publisher" name="transform_base_to_link" args="0 0 0 0 0 0  /base_footprint /base_link 11"/>
 	<node pkg="tf" type="static_transform_publisher" name="transform_base_to_laser" args="0 0.156 0.24 0 0 0  /base_link /base_laser_link 11"/>
 	<node pkg="tf" type="static_transform_publisher" name="transform_link_to_laser" args="0 0 0 0 0 0  /base_laser_link /laser 11"/>
+	<node pkg="joy" type="joy_node" name="joy_node"/>
+	<node pkg="odom_speed" type="joyNav2d.py" name="joyNav2d"/>
 	
 		<!--node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find odom_speed)/config/rviz/hokuyo.rviz" /-->
 </launch>
