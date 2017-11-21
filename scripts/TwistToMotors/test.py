@@ -19,7 +19,7 @@
 
 import rospy
 import roslib
-from std_msgs.msg import Float32
+from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist 
 
 #############################################################
@@ -37,8 +37,8 @@ class TwistToMotors():
     
         self.w = rospy.get_param("~base_width", 0.32)
     
-        self.pub_lmotor = rospy.Publisher('left_motor/setpoint', Float32, queue_size=10)
-        self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float32, queue_size=10)
+        self.pub_lmotor = rospy.Publisher('left_motor/setpoint', Float64, queue_size=10)
+        self.pub_rmotor = rospy.Publisher('right_motor/setpoint', Float64, queue_size=10)
         rospy.Subscriber('cmd_vel', Twist, self.twistCallback)
     
     
