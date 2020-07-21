@@ -1,4 +1,4 @@
- Simple ifferential-drive autonomous lidar  platform.
+ # Simple differential-drive autonomous lidar  platform.
 
 > This includes the necessary nodes for a simple 2 wheel autonomous robot.
 
@@ -35,8 +35,11 @@ And that's it! Everything is now on these launch files :) and yeah ... the /cmd 
 
 
 # Meta
+
 Fabián G. [GitHub](https://github.com/fgomezgo)
+
 Luis M.  [GitHub](https://github.com/lemontyc)
+
 Naomi T.
 
 
